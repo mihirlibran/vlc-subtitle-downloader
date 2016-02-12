@@ -14,29 +14,31 @@ def getHash(fileName):
 	return hashlib.md5(data).hexdigest()
 
 def getSubtitle(fileName):
+	'''This function downloads the subtitle file '''
 	hashcode=getHash(fileName)
-	#print("Hashcode:"+hashcode)
 	extensions=[".flv",".avi",".mov",".mp4",".mpg",".mpeg","wmv",".mkv"]
 	for extension in extensions:
 		if extension in fileName:
 			fileName=fileName.replace(extension,"")
-	#print(fileName)
 	subtitleFileName=fileName+".srt"
-	subtitleFile=open(subtitleFileName,"wb")
-	headers={"User-agent":"SubDB/1.0 (vlc-subtitle-downloader/1.0; https://github.com/mihirlibran/vlc-subtitle-downloader)"}
-	url="http://api.thesubdb.com/?action=download&hash="+hashcode+"&language=en"
-	#print(url)
-	request=urllib2.Request(url,None,headers)
-	response=urllib2.urlopen(request)
-	subtitleFile.write(response.read())
-	subtitleFile.close()
+	if not os.path.exists(subtitleFileName):
+		subtitleFile=open(subtitleFileName,"wb")
+		headers={"User-agent":"SubDB/1.0 (vlc-subtitle-downloader/1.0; https://github.com/mihirlibran/vlc-subtitle-downloader)"}
+		url="http://api.thesubdb.com/?action=download&hash="+hashcode+"&language=en"
+		request=urllib2.Request(url,None,headers)
+		response=urllib2.urlopen(request)
+		subtitleFile.write(response.read())
+		subtitleFile.close()
 	
 
 vlcPath=os.path.join("C:/","Program Files (x86)","VideoLAN","VLC","vlc.exe")
-#videoPath="\\E:\TV SHOWS\\CASTLE SEASON 1\\Castle [1x01] Flowers for Your Grave.mkv"
-#print(vlcPath)
 
 fileName=sys.argv[1]
-getSubtitle(fileName)
 
-#p=subprocess.Popen([vlcPath,videoPath])
+try:
+	getSubtitle(fileName)
+	print("Subtitles downloaded")
+except:
+	print("Subtitles unavailable")
+
+p=subprocess.Popen([vlcPath,fileName])
